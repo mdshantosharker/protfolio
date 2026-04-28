@@ -8,7 +8,7 @@ const ProjectCard = ({ project, onClick }) => (
   <motion.div 
     layoutId={`card-${project.id}`}
     whileHover={{ y: -10 }}
-    className="relative group h-[450px] rounded-[3rem] overflow-hidden bg-slate-900 cursor-pointer shadow-2xl"
+    className="relative group h-112.5 rounded-[3rem] overflow-hidden bg-slate-900 cursor-pointer shadow-2xl"
     onClick={() => onClick(project)}
   >
     <div className="absolute inset-0">

@@ -23,7 +23,7 @@ const Skills = () => {
   const NeonCard = ({ skill }) => (
     <motion.div
       whileHover={{ scale: 1.05, y: -10 }}
-      className="relative flex items-center gap-6 px-10 py-6 rounded-3xl bg-white/40 backdrop-blur-3xl border transition-all duration-500 cursor-default group overflow-hidden"
+      className="relative flex items-center gap-3 md:gap-6 px-6 md:px-10 py-4 md:py-6 rounded-2xl md:rounded-3xl bg-white/60 md:bg-white/40 backdrop-blur-md md:backdrop-blur-3xl border transition-all duration-500 cursor-default group overflow-hidden"
       style={{ borderColor: `${skill.color}44` }}
     >
       {/* Neon Glow Border */}
@@ -32,14 +32,14 @@ const Skills = () => {
         style={{ boxShadow: `inset 0 0 20px ${skill.color}22, 0 0 40px ${skill.color}11` }}
       />
       
-      <div className="w-12 h-12 flex items-center justify-center relative">
+      <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center relative">
         <svg viewBox="0 0 24 24" className="w-full h-full drop-shadow-lg transition-transform group-hover:scale-125 duration-500" style={{ fill: skill.color }}>
           <path d={skill.path} />
         </svg>
-        <div className="absolute inset-0 blur-xl opacity-0 group-hover:opacity-40 transition-opacity" style={{ backgroundColor: skill.color }} />
+        <div className="absolute inset-0 blur-lg md:blur-xl opacity-0 group-hover:opacity-40 transition-opacity" style={{ backgroundColor: skill.color }} />
       </div>
       
-      <span className="text-xl font-black text-slate-900 tracking-tighter uppercase">
+      <span className="text-sm md:text-xl font-black text-slate-900 tracking-tighter uppercase">
         {skill.name}
       </span>
     </motion.div>
@@ -47,7 +47,7 @@ const Skills = () => {
 
   return (
     <section 
-      className="py-40 bg-white overflow-hidden relative" 
+      className="py-5 md:py-40 bg-white overflow-hidden relative" 
       id="skills"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -56,30 +56,28 @@ const Skills = () => {
       <motion.div 
         animate={{ x: [0, -1000] }}
         transition={{ repeat: Infinity, duration: 100, ease: "linear" }}
-        className="absolute top-1/2 -translate-y-1/2 left-0 whitespace-nowrap pointer-events-none select-none opacity-[0.03]"
+        className="absolute top-1/2 -translate-y-1/2 left-0 whitespace-nowrap pointer-events-none select-none opacity-[0.02] md:opacity-[0.03]"
       >
-        <span className="text-[40rem] font-black tracking-tighter text-slate-900">
+        <span className="text-[20rem] md:text-[40rem] font-black tracking-tighter text-slate-900">
           TECH STACK TECH STACK TECH STACK
         </span>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-6 mb-32 relative z-10 text-center md:text-left">
+      <div className="max-w-7xl mx-auto px-6 mb-16 md:mb-32 relative z-10 text-center md:text-left">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="mb-6 flex justify-center md:justify-start"
         >
-          <span className="text-primary-container font-black uppercase tracking-[0.5em] text-xs px-8 py-3 bg-slate-50 rounded-full border border-slate-100 shadow-sm">
-            Core Competencies
-          </span>
+         
         </motion.div>
-        <h3 className="text-6xl md:text-9xl font-black text-slate-900 tracking-tighter leading-[0.8]">
-          Looping <span className="text-slate-200 italic">Excellence.</span>
+        <h3 className="text-4xl md:text-9xl font-black text-slate-900 tracking-tighter leading-tight md:leading-[0.8]">
+          SKILLS <span className="text-slate-200 italic">Excellence.</span>
         </h3>
       </div>
 
-      <div className="relative flex flex-col gap-12 z-20">
+      <div className="relative flex flex-col gap-6 md:gap-12 z-20">
         {/* Row 1: Right to Left */}
         <div className="flex overflow-hidden">
           <motion.div 
@@ -89,7 +87,7 @@ const Skills = () => {
               duration: isHovered ? 60 : 35,
               ease: "linear",
             }}
-            className="flex gap-12 whitespace-nowrap px-6"
+            className="flex gap-6 md:gap-12 whitespace-nowrap px-6"
           >
             {tripledSkills.map((skill, i) => (
               <NeonCard key={`row1-${i}`} skill={skill} />
@@ -106,7 +104,7 @@ const Skills = () => {
               duration: isHovered ? 80 : 45,
               ease: "linear",
             }}
-            className="flex gap-12 whitespace-nowrap px-6"
+            className="flex gap-6 md:gap-12 whitespace-nowrap px-6"
           >
             {[...tripledSkills].reverse().map((skill, i) => (
               <NeonCard key={`row2-${i}`} skill={skill} />
@@ -116,8 +114,8 @@ const Skills = () => {
       </div>
 
       {/* Side Fades */}
-      <div className="absolute top-0 left-0 h-full w-80 bg-gradient-to-r from-white via-white/80 to-transparent z-30 pointer-events-none" />
-      <div className="absolute top-0 right-0 h-full w-80 bg-gradient-to-l from-white via-white/80 to-transparent z-30 pointer-events-none" />
+      <div className="absolute top-0 left-0 h-full w-20 md:w-80 bg-gradient-to-r from-white via-white/80 to-transparent z-30 pointer-events-none" />
+      <div className="absolute top-0 right-0 h-full w-20 md:w-80 bg-gradient-to-l from-white via-white/80 to-transparent z-30 pointer-events-none" />
     </section>
   );
 };
