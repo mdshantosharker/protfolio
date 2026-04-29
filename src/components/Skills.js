@@ -159,6 +159,11 @@ const CategoryCard = ({ category, index }) => {
 const Skills = () => {
   const containerRef = useRef(null);
   const { mouseX, mouseY } = useMousePosition(containerRef);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <section id="skills" className="py-20 md:py-28 bg-white overflow-hidden relative cursor-crosshair"> 
@@ -177,28 +182,30 @@ const Skills = () => {
       />
 
       {/* Floating Background Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              y: [0, -100, 0],
-              x: [0, Math.random() * 50 - 25, 0],
-              opacity: [0, 0.3, 0],
-            }}
-            transition={{
-              duration: 5 + Math.random() * 10,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-            }}
-            className="absolute w-2 h-2 bg-primary-container/20 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-          />
-        ))}
-      </div>
+      {mounted && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              animate={{
+                y: [0, -100, 0],
+                x: [0, Math.random() * 50 - 25, 0],
+                opacity: [0, 0.3, 0],
+              }}
+              transition={{
+                duration: 5 + Math.random() * 10,
+                repeat: Infinity,
+                delay: Math.random() * 5,
+              }}
+              className="absolute w-2 h-2 bg-primary-container/20 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Large Parallax Background Text */}
       <motion.div 
