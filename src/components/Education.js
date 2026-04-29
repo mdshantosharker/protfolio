@@ -4,21 +4,21 @@ import { motion } from "framer-motion";
 
 const EducationCard = ({ year, degree, institution, details, marker, isLeft }) => (
   <div
-    className={`relative flex items-center justify-between w-full mb-5 ${isLeft ? "flex-row-reverse" : "flex-row"}`}
+    className={`relative flex items-center justify-between w-full mb-12 md:mb-20 ${isLeft ? "flex-row-reverse" : "flex-row"}`}
   >
     {/* Empty space for the other side */}
-    <div className="hidden md:block w-[45%]" />
+    <div className="hidden md:block w-[42%]" />
 
     {/* Year Node on the Timeline */}
-    <div className="absolute left-5 md:left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
+    <div className="absolute left-8 md:left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
       <motion.div
         initial={{ scale: 0 }}
         whileInView={{ scale: 1 }}
-        className="px-4 h-12 rounded-full bg-white border-4 border-primary-container shadow-[0_0_20px_rgba(0,193,142,0.3)] flex items-center justify-center font-black text-[10px] text-primary-container whitespace-nowrap"
+        className="px-3 md:px-4 h-10 md:h-12 rounded-full bg-white border-4 border-primary-container shadow-[0_0_20px_rgba(0,193,142,0.3)] flex items-center justify-center font-black text-[8px] md:text-[10px] text-primary-container whitespace-nowrap"
       >
         {marker}
       </motion.div>
-      <div className="h-full w-1 bg-linear-to-b from-primary-container to-transparent absolute top-12 bottom-0" />
+      <div className="h-full w-1 bg-linear-to-b from-primary-container to-transparent absolute top-10 md:top-12 bottom-0" />
     </div>
 
     {/* The Content Card */}
@@ -27,7 +27,7 @@ const EducationCard = ({ year, degree, institution, details, marker, isLeft }) =
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8, type: "spring" }}
-      className={`w-full md:w-[45%] ml-16 md:ml-0 bg-white/40 backdrop-blur-3xl border border-white/40 rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative group overflow-hidden`}
+      className={`w-full md:w-[42%] ml-24 md:ml-0 bg-white/40 backdrop-blur-3xl border border-white/40 rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative group overflow-hidden`}
     >
       {/* Accent Glow */}
       <div className="absolute top-0 right-0 w-24 md:w-32 h-24 md:h-32 bg-primary-container/5 blur-2xl md:blur-3xl group-hover:bg-primary-container/10 transition-colors" />
@@ -68,7 +68,7 @@ const Education = () => {
   ];
 
   return (
-    <section className="py-24 md:py-40 bg-white overflow-hidden relative" id="education">
+    <section className="py-20 md:py-28 bg-white overflow-hidden relative" id="education">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-80 md:w-125 h-80 md:h-125 bg-primary-container/5 rounded-full blur-[80px] md:blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-80 md:w-125 h-80 md:h-125 bg-blue-500/5 rounded-full blur-[80px] md:blur-[120px] pointer-events-none" />
@@ -92,7 +92,7 @@ const Education = () => {
 
         <div className="relative">
           {/* Central Timeline Line */}
-          <div className="absolute left-5 md:left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-linear-to-b from-slate-100 via-slate-200 to-transparent" />
+          <div className="absolute left-8 md:left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-linear-to-b from-slate-100 via-slate-200 to-transparent" />
 
           {educationData.map((edu, index) => (
             <EducationCard key={index} {...edu} isLeft={index % 2 === 0} />

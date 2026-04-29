@@ -74,9 +74,9 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          <button className="hidden sm:block bg-slate-900 text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-primary-container transition-all shadow-xl shadow-slate-900/10">
+          <a href="#contact" className="hidden sm:block bg-slate-900 text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-primary-container transition-all shadow-xl shadow-slate-900/10 text-center">
             Let's Talk
-          </button>
+          </a>
           
           {/* Mobile Menu Toggle */}
           <button 
@@ -122,9 +122,9 @@ const Navbar = () => {
                 {link.name}
               </a>
             ))}
-            <button className="w-full bg-slate-900 text-white py-4 font-black uppercase tracking-widest rounded-2xl mt-4">
+            <a href="#contact" onClick={() => setIsMenuOpen(false)} className="block w-full text-center bg-slate-900 text-white py-4 font-black uppercase tracking-widest rounded-2xl mt-4 hover:bg-primary-container transition-colors">
               Get In Touch
-            </button>
+            </a>
           </motion.div>
         )}
       </AnimatePresence>

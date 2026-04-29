@@ -23,7 +23,7 @@ const About = () => {
   return (
     <section 
       ref={containerRef}
-      className="py-24 md:py-40 relative overflow-hidden bg-white" 
+      className="py-20 md:py-28 relative overflow-hidden bg-white" 
       id="about"
     >
       {/* Background Decorative Text - Adjusted for Mobile */}
