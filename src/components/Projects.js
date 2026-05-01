@@ -1,228 +1,300 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { ExternalLink, X, Sparkles } from "lucide-react";
 
-const ProjectCard = ({ project, onClick }) => (
-  <motion.div 
-    layoutId={`card-${project.id}`}
-    whileHover={{ y: -12 }}
-    className="group relative h-[450px] w-full rounded-[2.5rem] overflow-hidden cursor-pointer isolate"
-    onClick={() => onClick(project)}
+const GithubIcon = ({ size = 24, className = "" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
   >
-    {/* Background Glow */}
-    <div className="absolute inset-0 bg-primary-container/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl" />
+    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+    <path d="M9 18c-4.51 2-5-2-7-2" />
+  </svg>
+);
 
-    {/* Main Card Container */}
-    <div className="absolute inset-[2px] rounded-[2.4rem] overflow-hidden bg-slate-900 border border-white/10 group-hover:border-primary-container/50 transition-colors duration-500 z-10">
-      
-      {/* Project Image */}
-      <div className="absolute inset-0 h-full w-full">
-        <img 
-          src={project.image} 
-          alt={project.name}
-          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-100"
-        />
-        {/* Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent opacity-90 transition-opacity duration-500" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-950 opacity-80" />
-      </div>
+// Project Data
+const projects = [
+  {
+    id: 1,
+    name: "KeenKeeper",
+    category: "Productivity",
+    image: "/keenKeeper.png",
+    stack: ["React", "Tailwind CSS", "Context API"],
+    description: "A sophisticated productivity and task management application focused on helping users organize daily routines, track goals, and maintain high efficiency.",
+    live: "https://keenkeeperctv.netlify.app/",
+    github: "https://github.com/mdshantosharker/KeenKeeper",
+    features: [
+      "Drag-and-drop task management",
+      "Real-time progress tracking",
+      "Responsive across all devices",
+      "Interactive dashboard UI"
+    ],
+    color: "from-blue-500/20 to-cyan-500/20",
+    accent: "text-blue-500",
+    bgAccent: "bg-blue-500"
+  },
+  {
+    id: 2,
+    name: "Lawyer Appointment",
+    category: "Booking System",
+    image: "/lawyer.png",
+    stack: ["React", "Tailwind CSS", "React Router"],
+    description: "Seamlessly connect clients with legal professionals. Features real-time booking, user authentication, and an intuitive dashboard for managing schedules.",
+    live: "https://lawyer-appoinmnet.netlify.app/",
+    github: "https://github.com/mdshantosharker/Lawyer-Appointment-Booking-Application",
+    features: [
+      "Real-time appointment scheduling",
+      "Secure user authentication",
+      "Dynamic dashboard for lawyers",
+      "Automated status updates"
+    ],
+    color: "from-amber-500/20 to-orange-500/20",
+    accent: "text-amber-500",
+    bgAccent: "bg-amber-500"
+  },
+  {
+    id: 3,
+    name: "FlagshipFaceOff",
+    category: "Comparison",
+    image: "/flagship.png",
+    stack: ["React", "Tailwind CSS", "API Integration"],
+    description: "Compare the latest flagship smartphones side-by-side with detailed specifications and user reviews to make informed buying decisions.",
+    live: "https://flagshipphones.netlify.app/",
+    github: "https://github.com/mdshantosharker/FlagshipFaceOff",
+    features: [
+      "Side-by-side spec comparison",
+      "Dynamic filtering & search",
+      "Interactive data visualization",
+      "Detailed device insights"
+    ],
+    color: "from-emerald-500/20 to-teal-500/20",
+    accent: "text-emerald-500",
+    bgAccent: "bg-emerald-500"
+  },
+];
 
-      {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-end p-8 z-20">
-        
-        {/* Animated Tech Stack */}
-        <div className="flex flex-wrap gap-2 mb-4 overflow-hidden">
-          {project.stack.slice(0, 3).map((tech, i) => (
-            <span 
-              key={i} 
-              className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-white font-bold text-[9px] tracking-widest uppercase border border-white/10 translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500"
-              style={{ transitionDelay: `${i * 100}ms` }}
-            >
-              {tech}
+const ProjectCard = ({ project, onClick, index }) => {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x);
+  const mouseYSpring = useSpring(y);
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      className="relative h-[480px] w-full rounded-[2.5rem] cursor-pointer group perspective-1000"
+      onClick={() => onClick(project)}
+    >
+      <motion.div 
+        layoutId={`project-card-${project.id}`}
+        className="absolute inset-0 bg-white rounded-[2.5rem] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden border border-slate-100 transition-all duration-500 group-hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] group-hover:border-slate-200"
+      >
+        {/* Top Image Area */}
+        <div className="relative h-[60%] w-full overflow-hidden bg-slate-50">
+          <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-40 z-10 transition-opacity duration-500 group-hover:opacity-20`} />
+          <motion.img 
+            layoutId={`project-image-${project.id}`}
+            src={project.image} 
+            alt={project.name}
+            className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+          />
+          
+          {/* Category Badge */}
+          <div className="absolute top-6 left-6 z-20">
+            <span className="px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black tracking-widest uppercase text-slate-900 shadow-sm">
+              {project.category}
             </span>
-          ))}
-          {project.stack.length > 3 && (
-            <span 
-              className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-white font-bold text-[9px] tracking-widest uppercase border border-white/10 translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500"
-              style={{ transitionDelay: `300ms` }}
-            >
-              +{project.stack.length - 3}
-            </span>
-          )}
-        </div>
-
-        {/* Title Area */}
-        <motion.div layoutId={`title-${project.id}`} className="relative z-20">
-           <h4 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2 group-hover:text-primary-container transition-colors duration-500 leading-none">
-             {project.name}
-           </h4>
-        </motion.div>
-
-        {/* Description snippet & Button container */}
-        <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-500 ease-in-out">
-          <div className="overflow-hidden">
-            <p className="text-slate-300 text-sm line-clamp-2 mt-4 font-medium">
-              {project.description}
-            </p>
           </div>
         </div>
 
-        {/* View Details Button - floats up */}
-        <div className="translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-200 mt-6">
-           <button className="flex items-center justify-center gap-3 w-full sm:w-auto text-[10px] font-black text-white uppercase tracking-[0.2em] bg-primary-container/20 hover:bg-primary-container px-8 py-4 rounded-full backdrop-blur-md border border-primary-container/50 hover:border-transparent hover:text-slate-900 transition-all duration-300 shadow-xl">
-             View Details
-             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-             </svg>
-           </button>
+        {/* Bottom Content Area */}
+        <div className="relative h-[40%] w-full bg-white p-6 md:p-8 flex flex-col transition-transform duration-500 group-hover:-translate-y-2">
+          <motion.h4 
+            layoutId={`project-title-${project.id}`}
+            className="text-2xl font-black text-slate-900 mb-2 group-hover:text-primary-container transition-colors"
+          >
+            {project.name}
+          </motion.h4>
+          
+          <p className="text-slate-500 text-sm line-clamp-2 font-medium mb-4">
+            {project.description}
+          </p>
+
+          <div className="flex items-center gap-2 mt-auto">
+            {project.stack.slice(0, 3).map((tech, i) => (
+              <span key={i} className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                {tech}
+              </span>
+            ))}
+          </div>
+
+          {/* Hover Reveal Button */}
+          <div className="absolute bottom-6 right-6 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-100">
+            <div className={`w-12 h-12 rounded-full ${project.bgAccent} text-white flex items-center justify-center shadow-lg shadow-${project.bgAccent.split('-')[1]}-500/30`}>
+              <ExternalLink size={20} strokeWidth={2.5} />
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </motion.div>
-);
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const ProjectModal = ({ project, onClose }) => {
-  // Prevent scrolling on body when modal is open
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, []);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-8 bg-slate-900/70 backdrop-blur-lg"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xl"
       onClick={onClose}
     >
-      <motion.div 
-        layoutId={`card-${project.id}`}
-        className="w-full max-w-3xl bg-white rounded-[2rem] overflow-hidden shadow-2xl relative my-auto flex flex-col max-h-[90vh]"
+      <motion.div
+        layoutId={`project-card-${project.id}`}
+        className="w-full max-w-5xl bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl relative flex flex-col lg:flex-row max-h-[95vh] lg:max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <motion.button 
-          whileHover={{ scale: 1.1, rotate: 90 }}
-          whileTap={{ scale: 0.9 }}
+        <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 bg-black/40 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-50 transition-colors backdrop-blur-md"
+          className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 md:w-12 md:h-12 bg-white/80 hover:bg-white text-slate-900 rounded-full flex items-center justify-center z-50 transition-all backdrop-blur-md shadow-sm border border-slate-100 hover:scale-105"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </motion.button>
+          <X size={20} className="md:w-6 md:h-6" />
+        </button>
 
-        {/* Image Header */}
-        <div className="relative h-48 sm:h-64 md:h-72 w-full overflow-hidden shrink-0 group">
-          <motion.img 
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.8 }}
-            src={project.image} 
+        {/* Image Section */}
+        <div className="w-full lg:w-[45%] h-56 sm:h-72 lg:h-auto relative overflow-hidden bg-slate-50 shrink-0">
+          <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-20 z-10`} />
+          <motion.img
+            layoutId={`project-image-${project.id}`}
+            src={project.image}
             alt={project.name}
-            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+            className="w-full h-full object-cover object-top"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
-          <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8">
-            <motion.div layoutId={`title-${project.id}`}>
-              <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-none">{project.name}</h2>
-            </motion.div>
-          </div>
         </div>
 
-        {/* Content Body */}
+        {/* Content Section */}
         <div 
-          className="p-6 md:p-8 bg-slate-50 flex-1 overflow-y-auto"
-          style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}
+          className="w-full lg:w-[55%] p-6 md:p-10 lg:p-12 flex flex-col overflow-y-auto bg-white"
+          style={{ scrollbarWidth: 'none' }}
         >
-          <div className="flex flex-col gap-6 md:gap-8">
-            
-            {/* Tech Stack */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            >
-              <h6 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                <span className="w-4 h-px bg-slate-300"></span> Technologies
-              </h6>
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            className={`px-4 py-2 bg-slate-50 inline-flex w-max rounded-full text-[10px] font-black tracking-widest uppercase mb-4 md:mb-6 shadow-sm border border-slate-100 ${project.accent}`}
+          >
+            {project.category}
+          </motion.div>
+
+          <motion.h2
+            layoutId={`project-title-${project.id}`}
+            className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-4 md:mb-6 leading-tight"
+          >
+            {project.name}
+          </motion.h2>
+
+          <motion.p 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+            className="text-slate-500 text-sm md:text-base font-medium leading-relaxed mb-8"
+          >
+            {project.description}
+          </motion.p>
+
+          <div className="space-y-8 mb-8 flex-1">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+              <h4 className="text-xs md:text-sm font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <Sparkles size={16} className={project.accent} /> Key Features
+              </h4>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                {project.features.map((feature, i) => (
+                  <li 
+                    key={i} 
+                    className="flex items-center gap-3 text-slate-600 font-medium text-xs md:text-sm bg-slate-50 p-3 rounded-xl border border-slate-100"
+                  >
+                    <div className={`w-2 h-2 rounded-full ${project.bgAccent} shrink-0`} />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+              <h4 className="text-xs md:text-sm font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="w-4 h-px bg-slate-300" /> Technologies
+              </h4>
               <div className="flex flex-wrap gap-2">
                 {project.stack.map((tech, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-white text-slate-700 font-bold text-[10px] uppercase tracking-wider rounded-md border border-slate-200 shadow-sm hover:border-primary-container transition-colors cursor-default">
+                  <span key={i} className="px-4 py-2 bg-slate-50 border border-slate-100 text-slate-600 font-bold text-[10px] md:text-xs rounded-xl uppercase tracking-wider">
                     {tech}
                   </span>
                 ))}
               </div>
             </motion.div>
-
-            {/* Description */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            >
-              <h6 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                <span className="w-4 h-px bg-slate-300"></span> Overview
-              </h6>
-              <p className="text-slate-600 font-medium text-sm md:text-base leading-relaxed">
-                {project.description}
-              </p>
-            </motion.div>
-
-            {/* Grid for Challenges & Future */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-            >
-               <div className="p-5 bg-white rounded-2xl border border-rose-100 shadow-sm hover:shadow-md transition-shadow">
-                  <h6 className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                     Challenges Faced
-                  </h6>
-                  <p className="text-slate-600 font-medium text-xs leading-relaxed">
-                    {project.challenges}
-                  </p>
-               </div>
-               <div className="p-5 bg-white rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
-                  <h6 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                     Future Plans
-                  </h6>
-                  <p className="text-slate-600 font-medium text-xs leading-relaxed">
-                    {project.future}
-                  </p>
-               </div>
-            </motion.div>
-
-            {/* Action Buttons */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-200 mt-2"
-            >
-               <a 
-                 href={project.live} 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 className="flex-1 py-4 bg-primary-container text-white font-black text-xs tracking-widest uppercase rounded-xl flex items-center justify-center gap-2 hover:bg-primary-container/90 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-container/30"
-               >
-                 Live Project
-                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                 </svg>
-               </a>
-               <a 
-                 href={project.github} 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 className="flex-1 py-4 bg-slate-900 text-white font-black text-xs tracking-widest uppercase rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-900/30"
-               >
-                 GitHub Repo
-                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                   <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-                 </svg>
-               </a>
-            </motion.div>
           </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+            className="mt-auto flex flex-col sm:flex-row gap-3 md:gap-4 pt-6 md:pt-8 border-t border-slate-100 shrink-0"
+          >
+            <a
+              href={project.live}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex-1 py-4 md:py-5 ${project.bgAccent} text-white font-black text-xs md:text-sm tracking-widest uppercase rounded-2xl flex items-center justify-center gap-2 hover:opacity-90 transition-all hover:-translate-y-1 hover:shadow-lg shadow-${project.bgAccent.split('-')[1]}-500/30`}
+            >
+              Live Demo <ExternalLink size={18} />
+            </a>
+            <a
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-4 md:py-5 bg-slate-900 text-white font-black text-xs md:text-sm tracking-widest uppercase rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all hover:-translate-y-1 hover:shadow-lg shadow-slate-900/20"
+            >
+              Source Code <GithubIcon size={18} />
+            </a>
+          </motion.div>
         </div>
       </motion.div>
     </motion.div>
@@ -231,87 +303,59 @@ const ProjectModal = ({ project, onClose }) => {
 
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
-
-  const projects = [
-    {
-      id: 1,
-      name: "KeenKeeper",
-      image: "/keenKeeper.png",
-      stack: ["HTML", "CSS", "JavaScript", "React", "Tailwind CSS", "React Router", "Context API"],
-      description: "KeenKeeper is a sophisticated productivity and task management application focused on helping users organize daily routines, track goals, and maintain a high level of efficiency.",
-      live: "https://keenkeeperctv.netlify.app/",
-      github: "https://github.com/mdshantosharker/KeenKeeper",
-      challenges: "Creating a highly interactive and drag-and-drop enabled UI that performs smoothly across both desktop and mobile devices.",
-      future: "Adding collaborative team workspaces and deep integration with popular calendars.",
-    },
-    {
-      id: 2,
-      name: "Lawyer Appointment",
-      image: "/lawyer.png",
-      stack: ["HTML", "CSS", "JavaScript", "React", "Tailwind CSS", "React Router", "Context API"],
-      description: "A comprehensive Lawyer Appointment Booking Application designed to seamlessly connect clients with legal professionals. It features real-time booking, user authentication, and an intuitive dashboard for managing schedules.",
-      live: "https://lawyer-appoinmnet.netlify.app/",
-      github: "https://github.com/mdshantosharker/Lawyer-Appointment-Booking-Application",
-      challenges: "Implementing a robust real-time calendar and managing state for available time slots dynamically while preventing double bookings.",
-      future: "Plan to integrate video consultation capabilities and an AI-driven legal assistant for initial query filtering.",
-    },
-    {
-      id: 3,
-      name: "FlagshipFaceOff",
-      image: "/flagship.png",
-      stack: ["HTML", "CSS", "JavaScript", "React", "Tailwind CSS", "React Router", "Context API"],
-      description: "A dynamic mobile phone comparison platform, FlagshipFaceOff, allowing users to compare the latest flagship smartphones side-by-side with detailed specifications and user reviews.",
-      live: "https://flagshipphones.netlify.app/",
-      github: "https://github.com/mdshantosharker/FlagshipFaceOff",
-      challenges: "Structuring the complex nested specification data so it can be easily compared and rendered without performance issues.",
-      future: "Integrating a real-time price tracking system and user-generated benchmark scores.",
-    },
-  ];
-
+  
   return (
-    <section className="py-20 md:py-28 bg-white relative overflow-hidden" id="projects">
-      {/* Background Decorative Blob */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary-container/5 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
-      
+    <section className="py-24 md:py-32 bg-slate-50 relative overflow-hidden" id="projects">
+      {/* Background Orbs */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary-container/10 rounded-full blur-[100px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none translate-x-1/3 translate-y-1/3" />
+
       <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="mb-20 md:mb-32 flex flex-col items-center text-center">
+        {/* Header */}
+        <div className="flex flex-col items-center text-center mb-16 md:mb-24">
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="flex items-center gap-4 mb-6"
+            className="flex items-center justify-center gap-4 mb-6"
           >
-            <div className="w-12 h-px bg-primary-container"></div>
-            <span className="text-primary-container font-black uppercase tracking-[0.5em] text-xs">
+            <div className="w-10 h-px bg-primary-container/50"></div>
+            <span className="text-primary-container font-black uppercase tracking-[0.4em] text-xs">
               Portfolio
             </span>
-            <div className="w-12 h-px bg-primary-container"></div>
+            <div className="w-10 h-px bg-primary-container/50"></div>
           </motion.div>
-          <motion.h3 
+          
+          <motion.h2 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-slate-900 tracking-tighter leading-none"
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-[1.1] mb-6"
           >
-            Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-slate-600">Projects.</span>
-          </motion.h3>
+            Selected <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-slate-600">Works.</span>
+          </motion.h2>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-slate-500 font-medium text-base md:text-lg max-w-2xl mx-auto"
+          >
+            A curated collection of my recent web development projects, showcasing modern UI/UX and robust architectures.
+          </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
+        {/* Project Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
           {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: index * 0.2, duration: 0.6 }}
-            >
-              <ProjectCard 
-                project={project} 
-                onClick={setSelectedProject} 
-              />
-            </motion.div>
+            <ProjectCard 
+              key={project.id} 
+              project={project} 
+              onClick={setSelectedProject}
+              index={index}
+            />
           ))}
         </div>
       </div>
